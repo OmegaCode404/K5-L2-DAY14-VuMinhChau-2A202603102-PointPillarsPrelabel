@@ -25,14 +25,14 @@ Ghi **trước** khi chạy `scripts/pp_sweep.py`, rồi commit và push ngay (l
   s03f23: cấu hình chọn {'score_thr': '0.3'} → 9.9 (tốt nhất có thể 5.1)
   s05f13: cấu hình chọn {'score_thr': '0.5'} → 5.4 (tốt nhất có thể 4.4)
 
-- Cấu hình không hoàn toàn ổn định trên từng frame: leave-one-out chọn `score_thr=0.3` cho `s03f23` nhưng `0.5` cho hai frame còn lại. Tôi vẫn chọn `0.5` vì có chi phí tổng thấp nhất trên cả tập A (14.1 so với 21.1 của cấu hình gốc), dù số box cần thêm tăng từ 5 lên 11.
+- Cấu hình không hoàn toàn ổn định trên từng frame: leave-one-out chọn `score_thr=0.3` cho `s03f23` nhưng `0.5` cho hai frame còn lại. Chọn `0.5` vì có chi phí tổng thấp nhất trên cả tập A (14.1 so với 21.1 của cấu hình gốc), dù số box cần thêm tăng từ 5 lên 11.
 
 ## 3. Trước/sau (bước 8)
 
-![so sánh](../../d14_<ID>/compare/<frame>.jpg)
+![So sánh BEV frame s02f33](../../d14_102/compare/s02f33.jpg)
 
-- `scripts/pp_compare.py` báo giảm (hoặc tăng) ...% công sửa trên tập A.
-- Dự đoán ở mục 1 đúng hay sai? Giải thích bằng số box xóa/thêm/sửa: ...
+- `scripts/pp_compare.py` báo giảm 33% công sửa trên tập A (từ 21.1 xuống 14.1).
+- Dự đoán ở mục 1 đúng về hướng tổng thể: tăng `score_thr` giảm box thừa cần xóa từ 47 xuống 7, đồng thời giảm box cần sửa từ 4 xuống 2. Tuy nhiên, số box cần thêm tăng từ 5 lên 11, nên dự đoán không loại bỏ được đánh đổi giữa box thừa và box sót.
 
 ## 4. Tập B
 
@@ -40,10 +40,12 @@ Số đo từ `scripts/pp_prelabel.py --frames d14_<ID>/frames_B.txt --config d1
 
 | Xóa | Thêm | Sửa | Chi phí |
 |---:|---:|---:|---:|
-| | | | |
+| 43 | 32 | 4 | 46.9 |
 
-- Loại box tốn công sửa nhất ở tập B: ...
+- Loại box tốn công sửa nhất ở tập B: `Cyclist`, với chi phí quy đổi cao nhất (16.0: xóa 20, thêm 9, sửa 2); tiếp theo là `Car` (14.6).
 
 ## 5. Giới hạn
 
-- Nêu ít nhất 2 giới hạn (ví dụ: chỉ 3 frame tune; model KITTI không có Truck/Bus; chi phí là công thức, chưa phải thời gian sửa thật): ...
+- Chỉ tune trên 3 frame tập A; leave-one-out chọn `score_thr=0.3` cho một frame và `0.5` cho hai frame còn lại, nên cấu hình có thể chưa tổng quát tốt.
+- Model pretrained trên KITTI không có lớp `Truck` và `Bus`; dự đoán cho hai lớp này cần bổ sung thủ công.
+- Chi phí 46.9 là điểm theo công thức quy ước (xóa 0.3, thêm 1.0, sửa 0.5), không phải thời gian annotator thực tế; kết quả còn phụ thuộc cách ghép box và ngưỡng đánh giá.
